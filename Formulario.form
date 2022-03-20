@@ -8,10 +8,19 @@ formulario ~>> [
 		valor: "Nombre",
 		fondo: "Ingrese nombre"
 	>,
+<
+		tipo: "etiqueta",
+		valor: "Apellido"
+	>,
+	<
+		tipo: "texto",
+		valor: "Apellido",
+		fondo: "Ingrese apellido"
+	>,
 	<
 		tipo: "grupo-radio",
 		nombre: "Sexo",
-		valores: ['Masculino', 'Femenino']
+		valores: ['Masculino', 'Femenino','Otro']
 	>,
 	<
 		tipo: "grupo-option",
@@ -21,6 +30,6 @@ formulario ~>> [
 	<
 		tipo: "boton",
 		valor: "Valor",
-		evento: entrada
+		evento: info
 	>
 ]

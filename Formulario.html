@@ -5,16 +5,43 @@
                             <form>
                                 <label for="Nombre">Nombre</label><br>
 <input type="text" id="Nombre" name="Nombre" placeholder="Ingrese nombre"><br>
+<label for="Apellido">Apellido</label><br>
+<input type="text" id="Apellido" name="Apellido" placeholder="Ingrese apellido"><br>
 <label for="Sexo">Sexo</label>
 <input type="radio" id="Masculino" name="Sexo" value="Masculino">
 <label for="Masculino">Masculino</label>
 <input type="radio" id="Femenino" name="Sexo" value="Femenino">
-<label for="Femenino">Femenino</label><br>
+<label for="Femenino">Femenino</label>
+<input type="radio" id="Otro" name="Sexo" value="Otro">
+<label for="Otro">Otro</label><br>
 <label for="pais">pais</label>
 <select id="pais"><option value="Guatemala">Guatemala</option>
 <option value="El Salvador">El Salvador</option>
 <option value="Honduras">Honduras</option>
-</select><br> <input type="button" onclick="entrada" value="Valor"> <br>
-        </form>
+</select><br>
+ <input type="button" onclick="myFunction1()" value="Valor"> <br><script> 
+                                                function myFunction1() {var pais = document.getElementById("pais");
+document.getElementById("pais1").value = pais.options[pais.selectedIndex].value;
+document.getElementById("pais1").style.visibility = "visible";
+document.getElementById("pais").style.visibility = "visible";
+document.getElementById("Nombre1").value = document.getElementById("Nombre").value;
+document.getElementById("Nombre1").value = document.getElementById("Nombre").value;
+document.getElementById("Apellido1").value = document.getElementById("Apellido").value;
+document.getElementById("Apellido1").value = document.getElementById("Apellido").value;
+var Sexo = document.getElementsByName("Sexo");
+for(i=0; i<Sexo.length; i++){
+if(Sexo[i].checked){
+document.getElementById("Sexo1").value = Sexo[i].value;
+} }
+document.getElementById("div1").style.visibility = "visible";
+}</script><div id="div1" style="visibility: hidden;"><label for="Nombre1" >Nombre</label><br>
+<input type="text" id="Nombre1" name="Nombre"  ><br>
+<label for="Apellido1" >Apellido</label><br>
+<input type="text" id="Apellido1" name="Apellido"  ><br>
+<label for="Sexo"  >Sexo</label>
+<input type="text" id="Sexo1"  ><br>
+<label for="pais"  >pais</label>
+<input type="text" id="pais1"  ><br>
+</div>        </form>
                         </body>
                     </html>

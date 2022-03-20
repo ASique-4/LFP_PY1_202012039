@@ -155,6 +155,7 @@ class AnalizadorLexico:
                 self.buffer += cadena[tmp]
                 if tmp+1 < len(cadena):
                     tmp += 1
+                    self.columna += 1
                 else:
                     continue
         elif cadena[self.i-1] == "'":
@@ -162,6 +163,7 @@ class AnalizadorLexico:
                 self.buffer += cadena[tmp]
                 if tmp+1 < len(cadena):
                     tmp += 1
+                    self.columna += 1
                 else:
                     continue
         self.agregar_token(self.buffer,self.linea,self.columna,'texto')

@@ -1,9 +1,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 #  CODE-TEXT-EDITOR
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-VERSION = '0.1.079'
-VERSION_DATE = '2019-10-06'
-from fileinput import filename
+
 import webbrowser
 from Analizador import AnalizadorLexico
 import PySimpleGUI as sg 
@@ -70,8 +68,7 @@ def main_window(settings):
         ['File',['New','Open','Save','Save As','---','Exit']],
         ['Edit',['Undo','---','Cut','Copy','Paste','Delete','---','Find...','Replace...','---','Select All','Date/Time']],
         ['Format',['Theme', settings['themes'],'Font','Tab Size','Show Settings']],
-        ['Run',['Run Module']],
-        ['Help',['View Help','---','About Me']]]
+        ['Run',['Run Module']]]
 
     col1 = sg.Column([[sg.Multiline(default_text=settings['body'], font=settings['font'], key='_BODY_', size=(elem_width,20))]])
     col2 = sg.Column([[sg.Multiline(default_text=settings['out'], font=settings['font'], key='_OUT_', autoscroll=True, size=(elem_width,8))]])         
@@ -244,6 +241,7 @@ def show_settings():
 ##----RUN MENU FUNCTIONS---------------------------------##
 
 def run_module(): # F5 shortcut key
+        countLabel = []
         cadena = open(settings.get('filename'),'r+').read()
 
         #Instancia de analizador lexico
@@ -259,7 +257,11 @@ def run_module(): # F5 shortcut key
 
         # identificador igual numero puntoycoma
         #   i            i+1    i+2   i+3
-        strHtml ='''<!DOCTYPE html>
+        strHtml = ''
+        strInfo = '<div id="div1" style="visibility: hidden;">'
+        strSrciptInfoOption = ''
+        strSrciptInfo = ''
+        strHtmlinicio ='''<!DOCTYPE html>
                     <html>
                         <head><title>Formulario</title></head>
                         <body>
@@ -270,33 +272,55 @@ def run_module(): # F5 shortcut key
             #Llenado de etiquetas
             if listaTokens[i].tipo == 'dosPuntos' and listaTokens[i+1].lexema == 'etiqueta' and listaTokens[i-1].tipo == 'reservada_tipo':
                 for j in range(i,len(listaTokens)):
-                    if listaTokens[j].tipo == 'mayorque':
+                    if listaTokens[j].tipo == 'mayorque' and listaTokens[j+1].tipo == 'coma':
                         break
                     if listaTokens[j].tipo == 'dosPuntos' and listaTokens[j+1].tipo == 'texto' and listaTokens[j-1].tipo == 'reservada_valor':
                         strHtml += '<label for="{}">{}</label><br>\n'.format(listaTokens[j+1].lexema,listaTokens[j+1].lexema)
+                        strInfo += '<label for="{}1" >{}</label><br>\n'.format(listaTokens[j+1].lexema,listaTokens[j+1].lexema)
+                        strSrciptInfo += 'document.getElementById("{}1").value = document.getElementById("{}").value;\n'.format(listaTokens[j+1].lexema,listaTokens[j+1].lexema)
+                        
+                        
+                        countLabel.append(listaTokens[j+1].lexema)
                         break
             #Llenado de textos
             if listaTokens[i].tipo == 'dosPuntos' and listaTokens[i+1].lexema == 'texto' and listaTokens[i-1].tipo == 'reservada_tipo':
                 for j in range(i,len(listaTokens)):
-                    if listaTokens[j].tipo == 'mayorque':
+                    if listaTokens[j].tipo == 'mayorque' and listaTokens[j+1].tipo == 'coma':
                         break
                     if listaTokens[j].tipo == 'dosPuntos' and listaTokens[j+1].tipo == 'texto' and listaTokens[j-1].tipo == 'reservada_valor':
                         for k in range(j,len(listaTokens)):
-                            if listaTokens[k].tipo == 'mayorque':
+                            if listaTokens[k].tipo == 'mayorque' and listaTokens[k+1].tipo == 'coma':
                                 strHtml += '<input type="text" id="{}" name="{}"><br>\n'.format(listaTokens[j+1].lexema,listaTokens[j+1].lexema)
+                                strInfo += '<input type="text" id="{}1" name="{}"  ><br>\n'.format(listaTokens[j+1].lexema,listaTokens[j+1].lexema)
+                                strSrciptInfo += 'document.getElementById("{}1").value = document.getElementById("{}").value;\n'.format(listaTokens[j+1].lexema,listaTokens[j+1].lexema)
+                                
+                                
                                 break
                             if listaTokens[k].tipo == 'dosPuntos' and listaTokens[k+1].tipo == 'texto' and listaTokens[k-1].tipo == 'reservada_fondo':
                                 strHtml += '<input type="text" id="{}" name="{}" placeholder="{}"><br>\n'.format(listaTokens[j+1].lexema,listaTokens[j+1].lexema,listaTokens[k+1].lexema)
+                                strInfo += '<input type="text" id="{}1" name="{}"  ><br>\n'.format(listaTokens[j+1].lexema,listaTokens[j+1].lexema)
+                                strSrciptInfo += 'document.getElementById("{}1").value = document.getElementById("{}").value;\n'.format(listaTokens[j+1].lexema,listaTokens[j+1].lexema)
+                                
+                                
                                 break
             #Llenado de group-radio
             if listaTokens[i].tipo == 'dosPuntos' and listaTokens[i+1].lexema == 'grupo-radio' and listaTokens[i-1].tipo == 'reservada_tipo':
                 for j in range(i,len(listaTokens)):
-                    if listaTokens[j].tipo == 'mayorque':
+                    if listaTokens[j].tipo == 'mayorque' and listaTokens[j+1].tipo == 'coma':
                         break
                     if listaTokens[j].tipo == 'dosPuntos' and listaTokens[j+1].tipo == 'texto' and listaTokens[j-1].tipo == 'reservada_nombre':
                         strHtml += '<label for="{}">{}</label>\n'.format(listaTokens[j+1].lexema,listaTokens[j+1].lexema)
+                        strInfo += '<label for="{}"  >{}</label>\n'.format(listaTokens[j+1].lexema,listaTokens[j+1].lexema)
+                        strInfo += '<input type="text" id="{}1"  ><br>\n'.format(listaTokens[j+1].lexema)
+                        strSrciptInfo += 'var {} = document.getElementsByName("{}");\n'.format(listaTokens[j+1].lexema,listaTokens[j+1].lexema)
+                        strSrciptInfo += 'for(i=0; i<'+listaTokens[j+1].lexema+'.length; i++){\n'
+                        strSrciptInfo += 'if('+listaTokens[j+1].lexema+'[i].checked){\n'
+                        strSrciptInfo += 'document.getElementById("{}1").value = {}[i].value;\n'.format(listaTokens[j+1].lexema,listaTokens[j+1].lexema)
+                        strSrciptInfo += "} }\n"
+                        
+                        
                         for k in range(j,len(listaTokens)):
-                            if listaTokens[k].tipo == 'mayorque':
+                            if listaTokens[k].tipo == 'mayorque' and listaTokens[k+1].tipo == 'coma':
                                 break
                             if listaTokens[k].tipo == 'dosPuntos' and listaTokens[k+1].tipo == 'corcheteIzquierdo' and listaTokens[k-1].tipo == 'reservada_valores':
                                 for l in range(k,len(listaTokens)):
@@ -310,10 +334,16 @@ def run_module(): # F5 shortcut key
             #Llenado de group-option
             if listaTokens[i].tipo == 'dosPuntos' and listaTokens[i+1].lexema == 'grupo-option' and listaTokens[i-1].tipo == 'reservada_tipo':
                 for j in range(i,len(listaTokens)):
-                    if listaTokens[j].tipo == 'mayorque':
+                    if listaTokens[j].tipo == 'mayorque'  and listaTokens[j+1].tipo == 'coma':
                         break
                     if listaTokens[j].tipo == 'dosPuntos' and listaTokens[j+1].tipo == 'texto' and listaTokens[j-1].tipo == 'reservada_nombre':
                         strHtml += '<label for="{}">{}</label>\n'.format(listaTokens[j+1].lexema,listaTokens[j+1].lexema)
+                        strInfo += '<label for="{}"  >{}</label>\n'.format(listaTokens[j+1].lexema,listaTokens[j+1].lexema)
+                        strInfo += '<input type="text" id="{}1"  ><br>\n'.format(listaTokens[j+1].lexema)
+                        strSrciptInfoOption += 'var {} = document.getElementById("{}");\n'.format(listaTokens[j+1].lexema,listaTokens[j+1].lexema)
+                        strSrciptInfoOption += 'document.getElementById("{}1").value = {}.options[{}.selectedIndex].value;\n'.format(listaTokens[j+1].lexema,listaTokens[j+1].lexema,listaTokens[j+1].lexema)
+                        strSrciptInfoOption += 'document.getElementById("{}1").style.visibility = "visible";\n'.format(listaTokens[j+1].lexema)
+                        strSrciptInfoOption += 'document.getElementById("{}").style.visibility = "visible";\n'.format(listaTokens[j+1].lexema)
                         for k in range(j,len(listaTokens)):
                             if listaTokens[k].tipo == 'mayorque':
                                 break
@@ -322,30 +352,60 @@ def run_module(): # F5 shortcut key
                                 for l in range(k,len(listaTokens)):
                                     if listaTokens[l].tipo == 'corcheteDerecho':
                                         strHtml += '<option value="{}">{}</option>\n'.format(listaTokens[l-1].lexema,listaTokens[l-1].lexema)
-                                        strHtml += '</select><br>'
+                                        strHtml += '</select><br>\n'
                                         break
                                     if listaTokens[l].tipo == 'coma' and listaTokens[l-1].tipo == 'texto' and listaTokens[l+1].tipo == 'texto':
                                         strHtml += '<option value="{}">{}</option>\n'.format(listaTokens[l-1].lexema,listaTokens[l-1].lexema)
             #Llenado de botones
             if listaTokens[i].tipo == 'dosPuntos' and listaTokens[i+1].lexema == 'boton' and listaTokens[i-1].tipo == 'reservada_tipo':
                 for j in range(i,len(listaTokens)):
-                    if listaTokens[j].tipo == 'mayorque':
+                    if listaTokens[j].tipo == 'mayorque' and listaTokens[j+1].tipo == 'coma':
                         break
                     if listaTokens[j].tipo == 'dosPuntos' and listaTokens[j+1].tipo == 'texto' and listaTokens[j-1].tipo == 'reservada_valor':
                         for k in range(j,len(listaTokens)):
-                            if listaTokens[k].tipo == 'mayorque':
+                            if listaTokens[k].tipo == 'mayorque' and listaTokens[k+1].tipo == 'coma':
                                 break
                             if listaTokens[k].tipo == 'dosPuntos' and listaTokens[k+1].tipo == 'texto' and listaTokens[k-1].tipo == 'reservada_evento':
-                                strHtml += ' <input type="button" onclick="{}" value="{}"> <br>\n'.format(listaTokens[k+1].lexema,listaTokens[j+1].lexema)
-                                break
-                            elif listaTokens[k].tipo == 'dosPuntos' and listaTokens[k+1].tipo == 'menorque' and listaTokens[k+2].tipo == 'texto' and listaTokens[k+3].tipo == 'mayorque' and listaTokens[k-1].tipo == 'reservada_evento':
-                                strHtml += ' <input type="button" onclick="{}" value="{}"> <br>\n'.format(listaTokens[k+2].lexema,listaTokens[j+1].lexema)
+                                if listaTokens[k+1].lexema == 'entrada':
+                                    EntrastaHTML = open('Entrada.html','w')
+                                    strEntradHtml = ''
+                                    strEntrada = ''
+                                    Archivo = open(settings.get('filename'),'r')
+                                    strEntradHtml = '''<!DOCTYPE html>
+                    <html>
+                        <head><title>Formulario</title></head>
+                        <body>
+                            
+                                '''
+                                    for linea in Archivo:
+                                        strEntrada += linea +'<br>'
+                                    strHtml += ' <input type="button" onclick="myFunction()" value="{}"> <br>'.format(listaTokens[j+1].lexema)
+                                    strHtml += '<iframe id="entrada" src = "Entrada.html" ></iframe>'.format(strEntrada)
+                                    strHtml += '''<script> 
+                                                function myFunction() {
+                                                document.getElementById("entrada").style.visibility = ""visible"";
+                                                }
+                                                </script>'''
+                                    strEntradHtml += '<p >{}</p>'.format(strEntrada)
+                                    strEntradHtml += '''   
+                        </body>
+                    </html>'''
+                                    EntrastaHTML.write(strEntradHtml)
+                                    EntrastaHTML.close()
+                                if listaTokens[k+1].lexema == 'info':
+                                    strSrciptInfo += 'document.getElementById("div1").style.visibility = "visible";\n'
+                                    strHtml += ' <input type="button" onclick="myFunction1()" value="{}"> <br>'.format(listaTokens[j+1].lexema)
+                                    strHtml += '''<script> 
+                                                function myFunction1() {'''
+                                    strHtml += strSrciptInfoOption+ strSrciptInfo+'}'
+                                    strHtml +=  '''</script>'''
+                                    strHtml += strInfo + '</div>'
                                 break
                     
         strHtml += '''        </form>
                         </body>
                     </html>'''
-        f.write(strHtml)
+        f.write(strHtmlinicio+strHtml)
         f.close()
         webbrowser.open('Formulario.html') 
 
@@ -355,33 +415,6 @@ def obtenerValor(token,diccionario):
     elif token.tipo == 'identificador':
         return diccionario[token.lexema]
 
-##----HELP MENU FUNCTIONS--------------------------------##
-
-def get_help():
-    msg = '''
-    “Never let your ego get in the way of asking for help 
-    when in desperate need. We have all been helped at a 
-    point in our lives.” ― Edmond Mbiaka
-    
-    israel.dryer@gmail.com
-    '''
-    sg.Popup(msg)
-
-def about_me():
-    msg = '''
-    TextCodeEditor is a PySimpleGUI based text and code 
-    editor that is being developed as a hobby project.
-    It is very much a work in progress. So, if you'd 
-    like to contribute to the development, then be my
-    guest! 
-    
-    You can send any feedback to: israel.dryer@gmail.com. 
-    
-    And check the GitHub repository on GitHub/israel-dryer/
-    Version.......{}
-    Date..... {}
-    '''.format(VERSION, VERSION_DATE)
-    sg.popup(msg)
 
 
 ##----MAIN EVENT LOOP------------------------------------##
@@ -430,10 +463,6 @@ while True:
         window = main_window(settings)
         redir = RedirectText(window)
         sys.stdout = redir
-    if event in ('View Help',):
-        get_help()
-    if event in ('About Me',):
-        about_me()
     if event in ('Paste',):
         paste(window)
     if event in ('Select All',):
