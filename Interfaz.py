@@ -53,22 +53,20 @@ outstring = "STARTUP SETTINGS:\n"+"-"*40+"\nTheme"+"."*10+" {}\nTab size"+"."*7+
 settings.update(out = outstring.format(settings['theme'], settings['tabsize'], settings['font'][0], settings['font'][1], settings['filename']))
 
 def close_settings():
-    ''' Close the the shelve file upon exit '''
     settings.update(filename=None, body='', out='', info='> New File <')
     if save_user_settings:
         settings.close()
 
 
-##----SETUP GUI WINDOW-----------------------------------##
+##----CONFIGURACION INICIAL-----------------------------------##
 
 def main_window(settings):
-    ''' Create the main window; also called when the application theme is changed '''
     elem_width= 80 # adjust default width
     menu_layout = [
-        ['File',['New','Open','Save','Save As','---','Exit']],
-        ['Edit',['Undo','---','Cut','Copy','Paste','Delete','---','Find...','Replace...','---','Select All','Date/Time']],
-        ['Format',['Theme', settings['themes'],'Font','Tab Size','Show Settings']],
-        ['Run',['Run Module']]]
+        ['Archivo',['Nuevo','Abrir','Guardar','Guardar Como','---','Salir']],
+        ['Apariencia',['Temas', settings['themes'],'Fuente','Tamaño de letras','Mostrar configuración']],
+        ['Analizar',['Analizar']],
+        ['Reportes',['Reporte de Tokens','Reporte de Errores','Reporte de Usuario','Reporte Tecnico']]]
 
     col1 = sg.Column([[sg.Multiline(default_text=settings['body'], font=settings['font'], key='_BODY_', size=(elem_width,20))]])
     col2 = sg.Column([[sg.Multiline(default_text=settings['out'], font=settings['font'], key='_OUT_', autoscroll=True, size=(elem_width,8))]])         
@@ -78,21 +76,19 @@ def main_window(settings):
         [sg.Text(settings['info'], key='_INFO_', font=('Consolas',11), size=(elem_width,1))],
         [sg.Pane([col1, col2])]]
 
-    window = sg.Window('Text-Code Editor', window_layout, resizable=True, margins=(0,0), return_keyboard_events=True)
+    window = sg.Window('Analizador Lexico', window_layout, resizable=True, margins=(0,0), return_keyboard_events=True)
     return window
 
 
-##----FILE MENU FUNCTIONS--------------------------------##
+##----ARCHIVOS--------------------------------##
 
-def new_file(window): # CTRL+N shortcut key
-    ''' Setup a new session by clearing application variables and the body '''
+def new_file(window): # CTRL+N 
     window['_BODY_'].update(value='')
     window['_INFO_'].update(value='> New File <')
     settings.update(filename=None, body='', info='> New File <')
 
-def open_file(window): # CTRL+O shortcut key
-    ''' Open a local file in the editor '''
-    try: # 'OUT OF INDEX' error in trinket if 'CANCEL' button is pressed
+def open_file(window): # CTRL+O 
+    try: 
         filename = sg.popup_get_file('File Name:', title='Open', no_window=True)
     except:
         return
@@ -103,8 +99,7 @@ def open_file(window): # CTRL+O shortcut key
         window['_INFO_'].update(value=filename.replace('/',' > '))
         settings.update(filename=filename, body=file_text, info=filename.replace('/',' > '))
 
-def save_file(window, values): # CTRL+S shortcut key
-    ''' Save active file. If new, then calls the `save_file_as` function '''
+def save_file(window, values): # CTRL+S 
     filename = settings.get('filename')
     if filename not in (None,''):
         with open(filename,'w') as f:
@@ -115,8 +110,7 @@ def save_file(window, values): # CTRL+S shortcut key
         save_file_as(window, values)
 
 def save_file_as(window, values):
-    ''' Save the active file as another file, also called for new files '''
-    try: # 'OUT OF INDEX' error in Trinket if 'CANCEL' button is clicked
+    try: 
         filename = sg.popup_get_file('Save File', save_as=True, no_window=True)
     except:
         return
@@ -127,80 +121,36 @@ def save_file_as(window, values):
         settings.update(filename=filename, info=filename.replace('/',' > '))
 
 
-##----EDIT MENU FUNCTIONS--------------------------------##
+##----REPORTES------------------------------##
+def show_ReporteUsuario():
+    webbrowser.open()
 
-def undo(): # CTRL+Z shortcut key
+def show_ReporteTecnico():
     pass
 
-def cut(): # CTRL+X shortcut key
-    pass
 
-def copy(): # CTRL+C shortcut key
-    pass
-
-def paste(window): # CTRL+V shortcut key
-    ''' paste clipboard contents into current cursor position '''
-    try:
-        clip = window.TKroot.clipboard_get()
-    except:
-        return
-    else:
-        window['_BODY_'].Widget.insert("insert", clip)
-
-def delete():
-    pass
-
-def find(): # CTRL+F shortcut key
-    pass
-
-def replace(): # CTRL+H shortcut key
-    pass
-
-def select_all(window): # CTRL+A shortcut key
-    ''' select all text in the body '''
-    window['_BODY_'].Widget.tag_add("sel","1.0","end")
-
-def fetch_datetime(window, values):
-    ''' Append the current date and time into the body '''
-    datetime_stamp = datetime.now().strftime("%T %D")
-    new_body = values['_BODY_'] + datetime_stamp
-    window['_BODY_'].update(value=new_body)    
-    settings.update(body=new_body)    
-
-
-##----FORMAT MENU FUNCTIONS------------------------------##
+##----APARIENCIA------------------------------##
 
 def change_theme(window, event, values):
-    ''' Change the color theme of the application window. This will destroy the active window and 
-        recreate it with the same values.'''
-    #old_theme = settings['theme']
-    #if not old_theme == event:
-    #    print(f"Theme.......... {old_theme} => {event}\n")
+
     settings.update(theme=event, body=values['_BODY_'], out=values['_OUT_'])
     sg.change_look_and_feel(event)
     window.close()
 
 def change_font(window):
-    ''' Change default font on body element and save as user settings '''
-    # get the default font from user settings
+
     font_name, font_size = settings.get('font')
-    # get available fonts from local environment to use in combo box
     font_list = sorted([f for f in tkfont.families() if f[0]!='@'])
-    # check if default font is in font_list, if not return set first font in the list as default
     if not font_name in font_list:
       font_name = font_list[0]
-    # available sizes to use for combo box (restricted to practical sizes)
     font_sizes = [8,9,10,11,12,14]
-    # setup the font gui window
     font_layout = [
         [sg.Combo(font_list, key='_FONT_', default_value=font_name), 
          sg.Combo(font_sizes, key='_SIZE_', default_value=font_size)],[sg.OK(), sg.Cancel()]]
     font_window = sg.Window('Font', font_layout, keep_on_top=True)
-    # listen for font selection events
     font_event, font_values = font_window.read()
     if font_event not in (None,'Exit'):
         font_selection = (font_values['_FONT_'], font_values['_SIZE_'])
-        # check to see if the font changed
         if font_selection != settings['font']:
             settings.update(font=font_selection)
             window['_BODY_'].update(font=font_selection)
@@ -209,14 +159,12 @@ def change_font(window):
     font_window.close()
 
 def change_tabsize(window):
-    ''' Change the tab size in the body. This is the user interface for the set_tabsize function '''
     tab_layout = [[sg.Slider(range=(1,8), default_value=settings['tabsize'], orientation='horizontal', key='_SIZE_'), sg.OK(size=(5,2))]]
     tab_window = sg.Window('Tab Size', tab_layout, keep_on_top=True)
     tab_event, tab_values = tab_window.read()
     if tab_event not in (None, 'Exit'):
         old_tab_size = settings['tabsize']
         new_tab_size = int(tab_values['_SIZE_'])
-        # check to see if tab size changed
         if new_tab_size != old_tab_size:
             settings.update(tabsize=new_tab_size)
             set_tabsize(window, new_tab_size)
@@ -224,23 +172,21 @@ def change_tabsize(window):
     tab_window.close()
 
 def set_tabsize(window, size=4): 
-    ''' Adjust the tab size in the body; default is 4 '''
     font = tkfont.Font(font=settings.get('font'))
     tab_width = font.measure(' '*size)
     window['_BODY_'].Widget.configure(tabs=(tab_width,)) 
     settings.update(tabsize=size) 
 
 def show_settings():
-    ''' Print the saved user settings to the Output element '''
     print(f"Theme.......... {settings['theme']}")
     print(f"Tab size....... {settings['tabsize']}")
     print( "Font.............. {}, {}".format(*settings['font']))
     print(f"Open file...... {settings['filename']}\n")
 
 
-##----RUN MENU FUNCTIONS---------------------------------##
+##----ANALIZAR---------------------------------##
 
-def run_module(): # F5 shortcut key
+def run_module(): # F5 
         countLabel = []
         cadena = open(settings.get('filename'),'r+').read()
 
@@ -248,9 +194,6 @@ def run_module(): # F5 shortcut key
         lexico = AnalizadorLexico()
 
         lexico.analizar(cadena)
-
-        lexico.imprimirTokens()
-        lexico.imprimirErrores()
 
         #Guardar lista de tokens
         listaTokens = lexico.listaTokens
@@ -342,8 +285,7 @@ def run_module(): # F5 shortcut key
                         strInfo += '<input type="text" id="{}1"  ><br>\n'.format(listaTokens[j+1].lexema)
                         strSrciptInfoOption += 'var {} = document.getElementById("{}");\n'.format(listaTokens[j+1].lexema,listaTokens[j+1].lexema)
                         strSrciptInfoOption += 'document.getElementById("{}1").value = {}.options[{}.selectedIndex].value;\n'.format(listaTokens[j+1].lexema,listaTokens[j+1].lexema,listaTokens[j+1].lexema)
-                        strSrciptInfoOption += 'document.getElementById("{}1").style.visibility = "visible";\n'.format(listaTokens[j+1].lexema)
-                        strSrciptInfoOption += 'document.getElementById("{}").style.visibility = "visible";\n'.format(listaTokens[j+1].lexema)
+
                         for k in range(j,len(listaTokens)):
                             if listaTokens[k].tipo == 'mayorque':
                                 break
@@ -380,10 +322,10 @@ def run_module(): # F5 shortcut key
                                     for linea in Archivo:
                                         strEntrada += linea +'<br>'
                                     strHtml += ' <input type="button" onclick="myFunction()" value="{}"> <br>'.format(listaTokens[j+1].lexema)
-                                    strHtml += '<iframe id="entrada" src = "Entrada.html" ></iframe>'.format(strEntrada)
+                                    strHtml += '<iframe id="entrada" src = "Entrada.html" style="visibility: hidden;"></iframe>'.format(strEntrada)
                                     strHtml += '''<script> 
                                                 function myFunction() {
-                                                document.getElementById("entrada").style.visibility = ""visible"";
+                                                document.getElementById("entrada").style.visibility = "visible";
                                                 }
                                                 </script>'''
                                     strEntradHtml += '<p >{}</p>'.format(strEntrada)
@@ -417,7 +359,7 @@ def obtenerValor(token,diccionario):
 
 
 
-##----MAIN EVENT LOOP------------------------------------##
+##----MAIN------------------------------------##
 
 window = main_window(settings)
 redir = RedirectText(window)
@@ -426,32 +368,28 @@ sys.stdout = redir
 while True:
     event, values = window.read(timeout=1)
 
-    # adjust window when application is activated
     if not application_active:
         application_active = True
         set_tabsize(window)
-   
-    # listen for window events
-    if event in (None, 'Exit'):
+
+    if event in (None, 'Salir'):
         close_settings()
         break
-    if event in ('New','n:78'):
+    if event in ('Nuevo','n:78'):
         new_file(window)
-    if event in ('Open','o:79'):
+    if event in ('Abrir','o:79'):
         open_file(window)
-    if event in ('Save','s:83'):
+    if event in ('Guardar','s:83'):
         save_file(window, values)
-    if event in ('Save As',):
+    if event in ('Guardar como',):
         save_file_as(window, values)
-    if event in ('Date/Time',):
-        fetch_datetime(window, values)
-    if event in ('Font',):
+    if event in ('Fuente',):
         change_font(window)
-    if event in ('Tab Size',):
+    if event in ('Tamaño de letras',):
         change_tabsize(window)
-    if event in ('Show Settings',):
+    if event in ('Mostrar configuración',):
         show_settings()
-    if event in ('Run Module', 'F5:116' ):
+    if event in ('Analizar', 'F5:116' ):
         run_module()
     if event in settings['themes']: 
         ###############################>>> refactor this bit into a function
@@ -463,8 +401,16 @@ while True:
         window = main_window(settings)
         redir = RedirectText(window)
         sys.stdout = redir
-    if event in ('Paste',):
-        paste(window)
-    if event in ('Select All',):
-        select_all(window)
-
+    if event in ('Reporte Tecnico',):
+        show_ReporteTecnico()
+    if event in ('Reporte de Tokens',):
+        cadena = open(settings.get('filename'),'r+').read()
+        lexico.analizar(cadena)
+        lexico.imprimirTokens()
+    if event in ('Reporte de Errores',):
+        lexico = AnalizadorLexico()
+        cadena = open(settings.get('filename'),'r+').read()
+        lexico.analizar(cadena)
+        lexico.imprimirErrores()
+    if event in ('Reporte de Usuario',):
+        show_ReporteUsuario()
