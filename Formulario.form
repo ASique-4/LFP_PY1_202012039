@@ -5,7 +5,7 @@ formulario ~>> [
 	>,
 	<
 		tipo: "texto",
-		valor: "Nombre",
+		valoreso: "Nombre",
 		fondo: "Ingrese nombre"
 	>,
 <
@@ -30,6 +30,6 @@ formulario ~>> [
 	<
 		tipo: "boton",
 		valor: "Valor",
-		evento: info
+		evento: 'entrada'
 	>
 ]

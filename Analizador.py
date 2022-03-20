@@ -69,7 +69,7 @@ class AnalizadorLexico:
             self.buffer += caracter
             self.columna += 1
         elif caracter == '$':
-            print('Se terminó el análisis')
+            pass
         else:
             self.agregar_error(caracter,self.linea,self.columna)
 
@@ -151,7 +151,12 @@ class AnalizadorLexico:
         '''Estado S9'''
         tmp = int(self.i)
         if cadena[self.i-1] == '"':
-            while cadena[tmp] != '"': 
+            while cadena[tmp] != '"':
+                if cadena[tmp] == '\n':
+                    self.agregar_error('"'+self.buffer,self.linea,self.columna)
+                    self.estado = 0        
+                    self.i += tmp-self.i
+                    break
                 self.buffer += cadena[tmp]
                 if tmp+1 < len(cadena):
                     tmp += 1
@@ -161,6 +166,11 @@ class AnalizadorLexico:
         elif cadena[self.i-1] == "'":
             while cadena[tmp] != "'": 
                 self.buffer += cadena[tmp]
+                if cadena[tmp] == '\n':
+                    self.agregar_error("'"+self.buffer,self.linea,self.columna)
+                    self.estado = 0        
+                    self.i += tmp-self.i
+                    break
                 if tmp+1 < len(cadena):
                     tmp += 1
                     self.columna += 1
