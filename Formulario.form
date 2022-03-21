@@ -3,14 +3,14 @@ formulario ~>> [
 		tipo: "etiqueta",
 		valor: "Nombre"
 	>,
-	<
+<
 		tipo: "texto",
-		valoreso: "Nombre",
+		valor: "Nombre",
 		fondo: "Ingrese nombre"
 	>,
 <
 		tipo: "etiqueta",
-		valor: "Apellido"
+		valor: "Apellido",
 	>,
 	<
 		tipo: "texto",
@@ -23,13 +23,13 @@ formulario ~>> [
 		valores: ['Masculino', 'Femenino','Otro']
 	>,
 	<
-		tipo: "grupo-option",
+		tipo: "grupo-option"
 		nombre: "pais",
 		valores: ['Guatemala', 'El Salvador', 'Honduras']
 	>,
 	<
 		tipo: "boton",
 		valor: "Valor",
-		evento: 'entrada'
+		evento: 'info'
 	>
 ]

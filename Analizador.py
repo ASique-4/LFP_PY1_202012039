@@ -1,3 +1,4 @@
+import webbrowser
 from Token import Token
 from Error import Error
 from prettytable import PrettyTable
@@ -219,16 +220,42 @@ class AnalizadorLexico:
 
     def imprimirTokens(self):
         '''Imprime una tabla con los tokens'''
+        tokensHTML = open('Tokens.html','w')
+        strTokens = '''<!DOCTYPE html>
+                    <html>
+                        <head><title>Formulario</title></head>
+                        <body>
+                            
+                                '''
         x = PrettyTable()
         x.field_names = ["Lexema","linea","columna","tipo"]
         for token in self.listaTokens:
             x.add_row([token.lexema, token.linea, token.columna,token.tipo])
-        print(x)
+        strTokens += x.get_html_string()
+        strTokens += '''    
+                        </body>
+                    </html>'''
+        tokensHTML.write(strTokens)
+        tokensHTML.close()
+        webbrowser.open('Tokens.html')
 
     def imprimirErrores(self):
         '''Imprime una tabla con los errores'''
+        erroresHTML = open('Errores.html','w')
+        strErrores = '''<!DOCTYPE html>
+                    <html>
+                        <head><title>Formulario</title></head>
+                        <body>
+                            
+                                '''
         x = PrettyTable()
         x.field_names = ["Descripcion","linea","columna"]
         for error_ in self.listaErrores:
             x.add_row([error_.descripcion, error_.linea, error_.columna])
-        print(x)        
+        strErrores += x.get_html_string()
+        strErrores += '''    
+                        </body>
+                    </html>'''
+        erroresHTML.write(strErrores)
+        erroresHTML.close()
+        webbrowser.open('Errores.html')

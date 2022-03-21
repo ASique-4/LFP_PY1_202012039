@@ -1,16 +1,12 @@
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-#  CODE-TEXT-EDITOR
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 import webbrowser
 from Analizador import AnalizadorLexico
 import PySimpleGUI as sg 
 from tkinter import font as tkfont
-from datetime import datetime
 import sys
 
 application_active = False 
-##-----CREATE CUSTOM RE-DIRECT STDOUT OBJECT-------------##
+
 
 class RedirectText:
     def __init__(self, window):
@@ -25,7 +21,7 @@ class RedirectText:
         sys.stdout = self.saveout 
         sys.stdout.flush()
 
-##-----SETUP DEFAULT USER SETTINGS-----------------------##
+##-----CONFIGURACION INICIAL-----------------------##
 
 save_user_settings = False
 
@@ -45,11 +41,10 @@ if len(settings.keys()) == 0:
     settings['info'] = '> New File <'
     settings['out'] = ''
 
-# default theme or user saved theme
+
 sg.change_look_and_feel(settings['theme'])
 
-# string to output initial start settings
-outstring = "STARTUP SETTINGS:\n"+"-"*40+"\nTheme"+"."*10+" {}\nTab size"+"."*7+" {}\nFont"+"."*11+" {} {}\nOpen file"+"."*6+" {}\n\n"
+outstring = "CONFIGURACION INICIAL\n"+"-"*40+"\nTema"+"."*10+" {}\nTamaño de fuenta"+"."*7+" {}\nFuente"+"."*11+" {} {}\nArchivo abierto"+"."*6+" {}\n\n"
 settings.update(out = outstring.format(settings['theme'], settings['tabsize'], settings['font'][0], settings['font'][1], settings['filename']))
 
 def close_settings():
@@ -58,10 +53,10 @@ def close_settings():
         settings.close()
 
 
-##----CONFIGURACION INICIAL-----------------------------------##
+##----CONFIGURACION DE LA PANTALLA-----------------------------------##
 
 def main_window(settings):
-    elem_width= 80 # adjust default width
+    elem_width= 80 
     menu_layout = [
         ['Archivo',['Nuevo','Abrir','Guardar','Guardar Como','---','Salir']],
         ['Apariencia',['Temas', settings['themes'],'Fuente','Tamaño de letras','Mostrar configuración']],
@@ -123,10 +118,10 @@ def save_file_as(window, values):
 
 ##----REPORTES------------------------------##
 def show_ReporteUsuario():
-    webbrowser.open()
+    webbrowser.open('Manual de usuario.pdf')
 
 def show_ReporteTecnico():
-    pass
+    webbrowser.open('Manual tecnico.pdf')
 
 
 ##----APARIENCIA------------------------------##
@@ -190,16 +185,12 @@ def run_module(): # F5
         countLabel = []
         cadena = open(settings.get('filename'),'r+').read()
 
-        #Instancia de analizador lexico
         lexico = AnalizadorLexico()
 
         lexico.analizar(cadena)
 
-        #Guardar lista de tokens
         listaTokens = lexico.listaTokens
 
-        # identificador igual numero puntoycoma
-        #   i            i+1    i+2   i+3
         strHtml = ''
         strInfo = '<div id="div1" style="visibility: hidden;">'
         strSrciptInfoOption = ''
@@ -213,7 +204,7 @@ def run_module(): # F5
         f = open('Formulario.html','w')
         for i in range(0,len(listaTokens)):
             #Llenado de etiquetas
-            if listaTokens[i].tipo == 'dosPuntos' and listaTokens[i+1].lexema == 'etiqueta' and listaTokens[i-1].tipo == 'reservada_tipo':
+            if listaTokens[i].tipo == 'dosPuntos' and listaTokens[i+1].lexema == 'etiqueta' and listaTokens[i-1].tipo == 'reservada_tipo' and listaTokens[i+2].tipo == 'coma':
                 for j in range(i,len(listaTokens)):
                     if listaTokens[j].tipo == 'mayorque' and listaTokens[j+1].tipo == 'coma':
                         break
@@ -226,7 +217,7 @@ def run_module(): # F5
                         countLabel.append(listaTokens[j+1].lexema)
                         break
             #Llenado de textos
-            if listaTokens[i].tipo == 'dosPuntos' and listaTokens[i+1].lexema == 'texto' and listaTokens[i-1].tipo == 'reservada_tipo':
+            if listaTokens[i].tipo == 'dosPuntos' and listaTokens[i+1].lexema == 'texto' and listaTokens[i-1].tipo == 'reservada_tipo' and listaTokens[i+2].tipo == 'coma':
                 for j in range(i,len(listaTokens)):
                     if listaTokens[j].tipo == 'mayorque' and listaTokens[j+1].tipo == 'coma':
                         break
@@ -247,7 +238,7 @@ def run_module(): # F5
                                 
                                 break
             #Llenado de group-radio
-            if listaTokens[i].tipo == 'dosPuntos' and listaTokens[i+1].lexema == 'grupo-radio' and listaTokens[i-1].tipo == 'reservada_tipo':
+            if listaTokens[i].tipo == 'dosPuntos' and listaTokens[i+1].lexema == 'grupo-radio' and listaTokens[i-1].tipo == 'reservada_tipo' and listaTokens[i+2].tipo == 'coma':
                 for j in range(i,len(listaTokens)):
                     if listaTokens[j].tipo == 'mayorque' and listaTokens[j+1].tipo == 'coma':
                         break
@@ -275,7 +266,7 @@ def run_module(): # F5
                                         strHtml += '<input type="radio" id="{}" name="{}" value="{}">\n'.format(listaTokens[l-1].lexema,listaTokens[j+1].lexema,listaTokens[l-1].lexema)
                                         strHtml += '<label for="{}">{}</label>\n'.format(listaTokens[l-1].lexema,listaTokens[l-1].lexema)
             #Llenado de group-option
-            if listaTokens[i].tipo == 'dosPuntos' and listaTokens[i+1].lexema == 'grupo-option' and listaTokens[i-1].tipo == 'reservada_tipo':
+            if listaTokens[i].tipo == 'dosPuntos' and listaTokens[i+1].lexema == 'grupo-option' and listaTokens[i-1].tipo == 'reservada_tipo' and listaTokens[i+2].tipo == 'coma':
                 for j in range(i,len(listaTokens)):
                     if listaTokens[j].tipo == 'mayorque'  and listaTokens[j+1].tipo == 'coma':
                         break
@@ -299,7 +290,7 @@ def run_module(): # F5
                                     if listaTokens[l].tipo == 'coma' and listaTokens[l-1].tipo == 'texto' and listaTokens[l+1].tipo == 'texto':
                                         strHtml += '<option value="{}">{}</option>\n'.format(listaTokens[l-1].lexema,listaTokens[l-1].lexema)
             #Llenado de botones
-            if listaTokens[i].tipo == 'dosPuntos' and listaTokens[i+1].lexema == 'boton' and listaTokens[i-1].tipo == 'reservada_tipo':
+            if listaTokens[i].tipo == 'dosPuntos' and listaTokens[i+1].lexema == 'boton' and listaTokens[i-1].tipo == 'reservada_tipo' and listaTokens[i+2].tipo == 'coma':
                 for j in range(i,len(listaTokens)):
                     if listaTokens[j].tipo == 'mayorque' and listaTokens[j+1].tipo == 'coma':
                         break
@@ -381,7 +372,7 @@ while True:
         open_file(window)
     if event in ('Guardar','s:83'):
         save_file(window, values)
-    if event in ('Guardar como',):
+    if event in ('Guardar Como',):
         save_file_as(window, values)
     if event in ('Fuente',):
         change_font(window)
@@ -392,11 +383,9 @@ while True:
     if event in ('Analizar', 'F5:116' ):
         run_module()
     if event in settings['themes']: 
-        ###############################>>> refactor this bit into a function
-        # set application to inactive
+
         application_active = False
         change_theme(window, event, values)
-        # recreate window and redirect object
         sys.stdout = redir.saveout
         window = main_window(settings)
         redir = RedirectText(window)
@@ -405,6 +394,7 @@ while True:
         show_ReporteTecnico()
     if event in ('Reporte de Tokens',):
         cadena = open(settings.get('filename'),'r+').read()
+        lexico = AnalizadorLexico()
         lexico.analizar(cadena)
         lexico.imprimirTokens()
     if event in ('Reporte de Errores',):
